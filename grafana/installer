@@ -1,0 +1,9 @@
+#! /bin/bash
+
+
+# Grafanna install
+#oc project monitoring
+helm install ./chart/ \
+    -f ./values-custom.yml \
+    --namespace sre-monitoring-logging \
+    --name sre-grafana --wait

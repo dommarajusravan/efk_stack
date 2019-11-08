@@ -1,0 +1,103 @@
+# Default values for efk.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+logstash:
+  enabled: false
+
+fluentd:
+  enabled: true
+  image:
+    repository: artifactory.galleon.c.statestr.com/docker-test/fluentd-elasticsearch
+    tag: v2.4.0
+  output:
+    host: sre-efkstack-logging-elasticsearch-client
+  service:
+    ports:
+      - name: "monitor-agent"
+        protocol: TCP
+        containerPort: 24220
+      - name: "forwader"
+        protocol: TCP
+        containerPort: 24224
+      - name: "http"
+        protocol: TCP
+        containerPort: 9880
+  configMaps:
+    forward-input.conf: |-
+      <source>
+        @type forward
+        port 24224
+        bind 0.0.0.0
+
+        @log_level debug
+        <security>
+          self_hostname statestreet
+          shared_key shared1234
+        </security>
+        <transport tls>
+          version                TLSv1_2
+          ca_path                /etc/fluent/keys/ca.crt.pem
+          cert_path              /etc/fluent/keys/server.crt.pem
+          private_key_path       /etc/fluent/keys/server.key.pem
+          private_key_passphrase fluentdserverkey
+          client_cert_auth       false
+        </transport>
+      </source>
+    output.conf: |
+      <match **>
+        @id elasticsearch
+        @type elasticsearch
+        @log_level info
+        include_tag_key true
+        # Replace with the host/port to your Elasticsearch cluster.
+        host "#{ENV['OUTPUT_HOST']}"
+        port "#{ENV['OUTPUT_PORT']}"
+        scheme "#{ENV['OUTPUT_SCHEME']}"
+        ssl_version "#{ENV['OUTPUT_SSL_VERSION']}"
+        logstash_format false
+        index_name fluentd
+        <buffer>
+          @type file
+          path /var/log/fluentd-buffers/kubernetes.system.buffer
+          flush_mode interval
+          retry_type exponential_backoff
+          flush_thread_count 2
+          flush_interval 5s
+          retry_forever
+          retry_max_interval 30
+          chunk_limit_size "#{ENV['OUTPUT_BUFFER_CHUNK_LIMIT']}"
+          queue_limit_length "#{ENV['OUTPUT_BUFFER_QUEUE_LIMIT']}"
+          overflow_action block
+        </buffer>
+      </match>
+
+kibana:
+  image:
+    repository: artifactory.galleon.c.statestr.com/docker-test/kibana-oss
+    tag: 6.7.0
+  files:
+    kibana.yml:
+      elasticsearch.hosts: ['sre-efkstack-logging-elasticsearch-client:9200']
+  env:
+    ELASTICSEARCH_HOSTS: http://{{ .Release.Name }}-elasticsearch-client:9200
+
+elasticsearch:
+  image:
+    repository: artifactory.galleon.c.statestr.com/docker-test/elasticsearch-oss
+    tag: 6.7.0
+  data:
+    persistence:
+      size: "20Gi"
+  podSecurityPolicy:
+    enabled: true
+  chownInitContainer:
+    enabled: false
+  sysctlInitContainer:
+    enabled: false
+  serviceAccounts:
+    client:
+      name: sre-efk-sa
+    master:
+      name: sre-efk-sa
+    data:
+      name: sre-efk-sa

@@ -1,0 +1,9 @@
+kubectl delete namespace sre-monitoring-logging
+
+#./prometheus/uninstaller
+
+#./grafana/uninstaller
+
+./efk-stack/uninstaller
+
+#pkill -9 kubectl

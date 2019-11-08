@@ -1,0 +1,3 @@
+#oc delete sa sre-efk-sa
+oc delete scc sre-efk-scc
+helm del --purge sre-efkstack-logging

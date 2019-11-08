@@ -1,0 +1,16 @@
+#! /bin/bash
+
+kubectl apply -f common/namespace/namespace.yml
+
+kubectl apply -f common/helm/service-account.yml
+kubectl apply -f common/helm/role-binding.yml
+
+# Prometheus
+#cd prometheus && ./installer
+
+# Grafana
+#cd ./../grafana && ./installer
+
+# EFK Stack
+#cd ./../efk-stack && ./installer
+cd efk-stack && ./installer

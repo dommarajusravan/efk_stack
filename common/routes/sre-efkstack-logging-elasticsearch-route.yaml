@@ -1,0 +1,33 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: "2019-09-11T12:43:20Z"
+  labels:
+    app: elasticsearch
+    chart: elasticsearch-1.30.0
+    component: client
+    heritage: Tiller
+    release: sre-efkstack-logging
+  name: sre-efkstack-logging-elasticsearch-client
+  namespace: sre-monitoring-logging
+  resourceVersion: "6737046"
+  selfLink: /apis/route.openshift.io/v1/namespaces/sre-monitoring-logging/routes/sre-efkstack-logging-elasticsearch-client
+  uid: bc094bc0-d491-11e9-a885-fa163e13be34
+spec:
+  host: sre-efkstack-es.apps.cwz-sre01.dev.us-east-1.tnc.galleon.c.statestr.com
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: sre-efkstack-logging-elasticsearch-client
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2019-09-11T12:43:20Z"
+      status: "True"
+      type: Admitted
+    host: sre-efkstack-es.apps.cwz-sre01.dev.us-east-1.tnc.galleon.c.statestr.com
+    routerName: router
+    wildcardPolicy: None

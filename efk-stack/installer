@@ -1,0 +1,19 @@
+#! /bin/bash
+
+oc apply -f ./../common/sa/efk-sa.yml
+oc apply -f ./../common/scc/efk-scc.yml
+oc apply -f ./../common/secrets/custom-fluentd-server-secret.yaml
+oc apply -f ./../common/secrets/native-fluentd-client-secret.yaml
+oc apply -f ./../common/routes/sre-efkstack-logging-elasticsearch-route.yaml
+oc apply -f ./../common/routes/sre-efkstack-logging-kibana-route.yaml
+
+cd chart && helm repo update
+
+helm dependency update
+
+cd .. && helm install ./chart/ \
+            -f ./values-custom.yml \
+            --name sre-efkstack-logging \
+            --namespace sre-monitoring-logging
+
+#--dry-run --debug

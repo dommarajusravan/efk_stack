@@ -1,0 +1,30 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: "2019-09-11T12:43:30Z"
+  labels:
+    app: kibana
+    chart: kibana-3.2.3
+    heritage: Tiller
+    release: sre-efkstack-logging
+  name: sre-efkstack-logging-kibana
+  namespace: sre-monitoring-logging
+  resourceVersion: "6737089"
+  selfLink: /apis/route.openshift.io/v1/namespaces/sre-monitoring-logging/routes/sre-efkstack-logging-kibana
+  uid: c23fe972-d491-11e9-a885-fa163e13be34
+spec:
+  host: sre-efkstack-kibana.apps.cwz-sre01.dev.us-east-1.tnc.galleon.c.statestr.com
+  to:
+    kind: Service
+    name: sre-efkstack-logging-kibana
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2019-09-11T12:43:30Z"
+      status: "True"
+      type: Admitted
+    host: sre-efkstack-kibana.apps.cwz-sre01.dev.us-east-1.tnc.galleon.c.statestr.com
+    routerName: router
+    wildcardPolicy: None
