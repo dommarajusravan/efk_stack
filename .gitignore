@@ -1,0 +1,13 @@
+.vscode
+.DS_Store
+*.zip
+*.tar.gz
+*.tgz
+
+# Helm internals
+*.lock
+*/*.lock
+*.tgz
+**/*.tgz
+**/_partials.tpl
+**/_globals.tpl

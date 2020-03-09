@@ -1,0 +1,92 @@
+# Default values for elk.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+logstash:
+  enabled: false
+
+filebeat:
+  enabled: false
+
+fluentd:
+  metrics:
+    enabled: true
+    service:
+      port: 24231
+    serviceMonitor:
+      enabled: false
+  annotations:
+   prometheus.io/scrape: "true"
+   prometheus.io/port: "24231"
+
+  image:
+    repository: gcr.io/google-containers/fluentd-elasticsearch
+  enabled: true
+  service:
+    ports:
+      - name: "monitor-agent"
+        protocol: TCP
+        containerPort: 24220
+      - name: "forward"
+        protocol: TCP
+        containerPort: 24224
+  output:
+    # Host should be like: <elasticsearch-service-name>.<namespace>.svc.cluster.local
+    host: "elasticsearch-master"
+
+fluent-bit:
+  image:
+    fluent_bit:
+      repository: fluent/fluent-bit
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        prometheus.io/path: "/api/v1/metrics/prometheus"
+        prometheus.io/port: "2020"
+        prometheus.io/scrape: "true"
+      port: 2020
+      type: NodePort
+    serviceMonitor:
+      enabled: false
+  enabled: true
+  service:
+    flush: 1
+    logLevel: info
+  backend:
+    type: forward
+    forward:
+      # Host should be like: <fluentd-service-name>.<namespace>.svc.cluster.local
+      host: efk-stack-fluentd
+      port: 24224
+      tls: "off"
+      tls_verify: "on"
+      tls_debug: 1
+      shared_key:
+
+kibana:
+  service:
+    type: NodePort
+    nodePort: 30005
+    #type: LoadBalancer
+    # elasticsearchHosts: "http://{{ .Release.Name }}-elasticsearch-client:9200"
+
+  client:
+    serviceType: NodePort
+
+elasticsearch-curator:
+  enabled: true
+
+elasticsearch-exporter:
+  enabled: true
+  es:
+    ## Address (host and port) of the Elasticsearch node we should connect to.
+    ## This could be a local node (localhost:9200, for instance), or the address
+    ## of a remote Elasticsearch server. When basic auth is needed,
+    ## specify as: <proto>://<user>:<password>@<host>:<port>. e.g., http://admin:pass@localhost:9200.
+    ##
+    uri: http://elasticsearch-master:9200
+    
+
+  podAnnotations:
+    "prometheus.io/port": "9108"
+    "prometheus.io/scrape": "true"
